@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17152b">
+<meta name="description" content="Assistente per risolvere La Ghigliottina con ChatGPT">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Ghigliottina AI</title>
+<style>
+:root{color-scheme:dark;--bg:#11101d;--panel:#1c1a2d;--line:#35324c;--gold:#f2c66d;--muted:#aaa7bf}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#292342 0,#11101d 55%);font-family:system-ui,-apple-system,sans-serif;color:#fff;min-height:100vh}
+main{max-width:520px;margin:auto;padding:26px 18px 40px}
+header{text-align:center;padding:16px 0 22px}
+.logo{width:66px;height:66px;margin:auto auto 12px;border-radius:22px;background:linear-gradient(145deg,#f5d98f,#c28b39);display:grid;place-items:center;color:#211b30;font-size:34px;font-weight:900;box-shadow:0 8px 30px #0006}
+h1{font-size:27px;margin:0;letter-spacing:.2px}header p{color:var(--muted);margin:7px 0 0;font-size:14px}
+.card{background:#1c1a2deF;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 14px 40px #0003}
+.intro{font-size:14px;color:var(--muted);line-height:1.5;margin:0 0 18px}
+label{display:block;font-size:13px;color:#d7d4e5;margin:14px 0 7px}
+input{width:100%;border:1px solid #45415e;background:#12111f;color:#fff;border-radius:12px;padding:14px;font:inherit;font-size:16px;outline:none}
+input:focus{border-color:var(--gold);box-shadow:0 0 0 3px #f2c66d22}
+button{width:100%;border:0;border-radius:14px;padding:15px 16px;font-size:16px;font-weight:750;cursor:pointer}
+.primary{background:linear-gradient(110deg,#f4d58e,#d7a94f);color:#211b30;margin-top:22px}
+.secondary{background:#29263e;color:#fff;border:1px solid #494563;margin-top:10px}
+.note{font-size:12px;color:var(--muted);line-height:1.5;margin:15px 2px 0}
+.status{min-height:20px;font-size:13px;color:var(--gold);margin-top:12px;text-align:center}
+footer{text-align:center;color:#77748d;font-size:11px;margin-top:20px}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <div class="logo">G</div>
+ <h1>Ghigliottina AI</h1>
+ <p>Il tuo assistente per La Ghigliottina</p>
+</header>
+<section class="card">
+ <p class="intro">Inserisci i cinque indizi della puntata. Preparerò una richiesta completa da inviare a ChatGPT per cercare la parola che li collega tutti.</p>
+ <form id="clues">
+  <div id="fields"></div>
+  <button class="primary" type="submit">✦ PREPARA LA SOLUZIONE</button>
+ </form>
+ <button class="secondary" id="openChat" type="button">Apri ChatGPT</button>
+ <div class="status" id="status" aria-live="polite"></div>
+ <p class="note">L'app non usa una chiave API e non effettua chiamate automatiche a ChatGPT: prepara il testo, lo copia e apre ChatGPT. Se il testo non viene incollato automaticamente, tieni premuto nel campo di chat e scegli “Incolla”.</p>
+</section>
+<footer>Ghigliottina AI · Assistente non ufficiale, indipendente da Rai</footer>
+</main>
+<script>
+const fields=document.getElementById('fields');
+for(let i=1;i<=5;i++){const wrap=document.createElement('div');wrap.innerHTML=`<label for="clue${i}">Indizio ${i}</label><input id="clue${i}" maxlength="100" autocomplete="off" placeholder="Scrivi il ${i}° indizio" required>`;fields.appendChild(wrap)}
+let promptText='';
+function makePrompt(){
+ const vals=[1,2,3,4,5].map(i=>document.getElementById('clue'+i).value.trim());
+ if(vals.some(v=>!v)) return null;
+ return `Agisci come un esperto concorrente de La Ghigliottina di Rai 1. Devi trovare una sola parola che si colleghi in modo sensato a tutti e cinque gli indizi.\n\nINDIZI:\n${vals.map((v,i)=>`${i+1}. ${v}`).join('\n')}\n\nRagiona con attenzione: considera significati letterali e figurati, sinonimi, contrari, modi di dire, espressioni composte, riferimenti culturali e parole che possono precedere o seguire ciascun indizio. Non forzare i collegamenti. Proponi le 3 soluzioni candidate più plausibili, per ciascuna spiega separatamente il legame con tutti e cinque gli indizi e segnala eventuali collegamenti deboli. Concludi scegliendo la migliore, indicando un livello di fiducia motivato. Se nessuna soluzione è convincente, dichiaralo chiaramente.`;
+}
+async function copyPrompt(){
+ try{await navigator.clipboard.writeText(promptText);return true}catch(e){
+  const t=document.createElement('textarea');t.value=promptText;document.body.appendChild(t);t.select();let ok=false;try{ok=document.execCommand('copy')}catch(_){}t.remove();return ok;
+ }
+}
+document.getElementById('clues').addEventListener('submit',async e=>{
+ e.preventDefault();promptText=makePrompt();if(!promptText)return;
+ const ok=await copyPrompt();
+ document.getElementById('status').textContent=ok?'Richiesta copiata! Apro ChatGPT: incollala nella chat.':'Apri ChatGPT e copia la richiesta dalla schermata del telefono.';
+ window.open('https://chatgpt.com/','_blank');
+});
+document.getElementById('openChat').addEventListener('click',()=>window.open('https://chatgpt.com/','_blank'));
+if('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>

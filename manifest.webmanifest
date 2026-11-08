@@ -1,0 +1,10 @@
+{
+  "name": "Ghigliottina AI",
+  "short_name": "Ghigliottina",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#11101d",
+  "theme_color": "#17152b",
+  "description": "Assistente per risolvere La Ghigliottina con ChatGPT",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
